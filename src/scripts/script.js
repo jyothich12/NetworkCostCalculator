@@ -45,11 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
            clusterData.forEach((cluster) => {
-
-                var marker = new H.map.Marker({ lat: cluster.lat, lng: cluster.lng});
-                marker.setData(cluster.zipcode);
                
-                map.addObject(marker);
+                addMarkerAt(map, cluster.lat, cluster.lng, "cluster", null);
 
                 // Create an info bubble
               //  var bubble = new H.ui.InfoBubble({ lat: cluster.lat, lng: cluster.lng }, {
@@ -64,15 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
            var center = findTheCenter(clusterData);
 
             // Move map to center
-            //map.setCenter(center);
-            map.setZoom(9);
-            map.getViewModel().setLookAtData(
-                {
-                    position: center,
-                    zoom: 10
-                },
-                true
-            );
+            map.setCenter(center);
+            map.setZoom(9.5);
+      //      map.getViewModel().setLookAtData(
+      //          {
+       //             position: center,
+       //             zoom: 10
+        //        },
+         //       true
+          //  );
 
         };
 
@@ -89,17 +86,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
         var points = computeConvexHull(clusterData);
 
-        const selectedOption = document.querySelector('input[name="clusterType"]:checked');
-        if(selectedOption && selectedOption.value){
-           var distance = drawShape(map, points, selectedOption.value);
+        const clusterType = document.querySelector('input[name="clusterType"]:checked');
+        const broadbandTech = document.querySelector('input[name="broadbandTech"]:checked');
+        if(clusterType && clusterType.value && broadbandTech && broadbandTech.value){
+            if (broadbandTech.value === 'ofc') {
+                constructOFCInterCluster(map, points, clusterType.value);
+                addLegendItems(ofcLegendItems);
+            } else if (broadbandTech.value === 'fso') {
+                constructFSOInterCluster(map, points, clusterType.value);
+                addLegendItems(fsoLegendItems);
+            } else if (broadbandTech.value === 'wireless') {
+                constructWirelessInterCluster(map, points, clusterType.value);
+                addLegendItems(wirelessLegendItems);
+            }
 
-           var html = "Total distance of cable to cover: <strong>" + distance.toFixed(2) + " miles</strong>"
-           document.getElementById('distanceDiv').innerHTML = html;
+          // var html = "Total distance of cable to cover: <strong>" + distance.toFixed(2) + " miles</strong>"
         }
         else
-            alert("Please select a cluster type before connecting points.");
+            alert("Please select a cluster type & technology before connecting points.");
 
     });
 });
+
+const ofcLegendItems = [
+    { iconPath: '../images/ofc_tower.png', name: 'Cluster' },
+    { iconPath: '../images/ofc_central.png', name: 'Hub' },
+    { iconPath: '../images/ofc_fiber.png', name: 'Optical Fiber Cable' }
+];
+
+const wirelessLegendItems = [
+    { iconPath: '../images/wireless_tower.png', name: 'Cluster' },
+    { iconPath: '../images/wireless_repeater.png', name: 'Repeater' },
+    { iconPath: '../images/wireless_central.png', name: 'Hub' }
+];
+
+const fsoLegendItems = [
+    { iconPath: '../images/fso_tower.png', name: 'FSO tower' },
+    { iconPath: '../images/fso_repeater.png', name: 'Repeater' },
+    { iconPath: '../images/fso_central.png', name: 'Central Hub' }
+];
+
+function addLegendItems(legendItems) {
+    const footerLegend = document.getElementById('footer-legend');
+
+    footerLegend.innerHTML = '';
+
+    legendItems.forEach(item => {
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+
+        const icon = document.createElement('img');
+        icon.src = item.iconPath;
+        icon.alt = item.name;
+        icon.className = 'legend-icon';
+
+        const itemName = document.createElement('span');
+        itemName.textContent = item.name;
+
+        legendItem.appendChild(icon);
+        legendItem.appendChild(itemName);
+
+        footerLegend.appendChild(legendItem);
+    });
+}
 
 

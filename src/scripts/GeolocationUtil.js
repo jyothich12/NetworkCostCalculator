@@ -66,6 +66,27 @@ function distance(p1, p2) {
     return Math.pow((p1.lat - p2.lat), 2) + Math.pow((p1.lng - p2.lng), 2);
 }
 
+// Function to calculate the distance between two points in miles
+function distance2(point1, point2) {
+    const earthRadiusMiles = 3958.8; // Earth's radius in miles
+    const lat1 = point1.lat * (Math.PI / 180);
+    const lat2 = point2.lat * (Math.PI / 180);
+    const lng1 = point1.lng * (Math.PI / 180);
+    const lng2 = point2.lng * (Math.PI / 180);
+
+    const dLat = lat2 - lat1;
+    const dLng = lng2 - lng1;
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1) * Math.cos(lat2) *
+              Math.sin(dLng / 2) * Math.sin(dLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = earthRadiusMiles * c;
+    return distance;
+}
+
 function nextToTop(stack) {
     const top = stack.pop();
     const nextTop = stack[stack.length - 1];
@@ -74,8 +95,54 @@ function nextToTop(stack) {
 }
 
 
+function cleanTheMap(map){
+   for (object of map.getObjects()){
+    if (object.id==="loop" || object.id==="star" || object.id==="relay" || object.id==="center" || object.id ==="cluster"){
+        map.removeObject(object);
+        }
+    }
+}
+
+function addMarkerAt(map, lat, lng, id, icon){
+    var marker = new H.map.Marker({ lat: lat, lng: lng}, { icon: icon });
+    marker.id = id;
+    map.addObject(marker);
+}
+
+function addMarkersAlongPolygon(map, polygonVertices, rangeOfTowerInMiles, icon) {
+
+    var totalrelays = 0;
+
+    for (let i = 0; i < polygonVertices.length - 1; i++) {
+        const startPoint = polygonVertices[i];
+        const endPoint = polygonVertices[i + 1];
+        const totalDistance = distance2(startPoint, endPoint);
+
+        // Place markers at range intervals
+        for (let j = rangeOfTowerInMiles; j <= totalDistance-rangeOfTowerInMiles; j += rangeOfTowerInMiles) {
+            const fraction = j / totalDistance;
+            const interpolatedPoint = {
+                lat: startPoint.lat + fraction * (endPoint.lat - startPoint.lat),
+                lng: startPoint.lng + fraction * (endPoint.lng - startPoint.lng),
+            };
+
+            // Add marker to the map at the interpolated point
+            const relayMarker = new H.map.Marker(interpolatedPoint);
+            relayMarker.id = "relay";
+            addMarkerAt(map, interpolatedPoint.lat, interpolatedPoint.lng, "relay", icon)
+            totalrelays += 1;
+        }
+    }
+
+    return totalrelays;
+}
+
+
 window.computeConvexHull = computeConvexHull
 window.findTheCenter = findTheCenter
+window.cleanTheMap = cleanTheMap
+window.addMarkersAlongPolygon = addMarkersAlongPolygon
+window.addMarkerAt = addMarkerAt
 
 
 
