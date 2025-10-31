@@ -1,9 +1,9 @@
-# Middle-Mile Rural Broadband Connectivity Planning and Visualization Tool
+# Designing optimal middle-mile network architecture for smart farming applications in rural areas
 
 
 **Overview**
 
-Middle-Mile Rural Broadband Connectivity Planning and Visualization Tool is a web application designed to calculate the installation cost of internet for various technologies based on cluster locations. Users can upload a text file containing information about cluster locations, including zip codes, latitudes, and longitudes. The application supports different cluster types (loop, star, wheel) and technologies (OFC, FSO, Wireless).
+Designing optimal middle-mile network architecture for smart farming applications in rural areas is a web application designed to calculate the installation cost of internet for various technologies based on cluster locations. Users can upload a text file containing information about cluster locations, including zip codes, latitudes, and longitudes. The application supports different cluster types (loop, star, wheel) and technologies (OFC, FSO, Wireless).
 
 **Getting Started**
 
